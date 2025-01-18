@@ -2,13 +2,9 @@ import { Request, Response } from "express";
 import { UserSignUpSchema } from "../types";
 import { AuthService } from "../services/AuthService";
 
+const authService: AuthService = new AuthService();
+
 export class AuthController {
-  private authService: AuthService;
-
-  constructor() {
-    this.authService = new AuthService();
-  }
-
   async signup(req: Request, res: Response) {
     try {
       const result = UserSignUpSchema.safeParse(req.body);
@@ -27,13 +23,17 @@ export class AuthController {
       const { name, email } = result.data;
 
       // check if user already exists
-      const isUserAlreadyExists = await this.authService.userExists(email);
+      const isUserAlreadyExists = await authService.userExists(email);
       if (isUserAlreadyExists) {
         res.status(400).json({ error: "User already exists" });
         return;
       }
 
-      // TODO: send email to user with verification code
+      // generate verification code
+      const otp = Math.floor(100000 + Math.random() * 900000);
+
+      // send email to user with verification code
+      await authService.sendVerificationCodeEmail(name, email, otp.toString());
 
       res.status(201).json({
         message: `Hi ${name}, we have sent you a verification code to your email ${email}.
