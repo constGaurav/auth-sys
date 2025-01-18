@@ -1,0 +1,26 @@
+{
+  "name": "auth-sys",
+  "version": "1.0.0",
+  "description": "A simple authentication system built with Express and TypeScript.",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "tsc && node dist/index.js",
+    "dev": "nodemon src/index.ts"
+  },
+  "keywords": [
+    "authentication",
+    "express",
+    "typescript",
+    "nodejs"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "nodemon": "^3.1.9"
+  }
+}
