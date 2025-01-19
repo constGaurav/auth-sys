@@ -3,6 +3,10 @@ import { config } from "../config";
 import { AuthRepository } from "../repositories/AuthRepository";
 import { OTP_EMAIL_TEMPLATE } from "../static/templates";
 import { EmailService } from "./EmailService";
+import { TUserBasicData } from "../types";
+import { totp } from "otplib";
+
+totp.options = { step: 30, digits: 6 };
 
 export class AuthService {
   private authRepository: AuthRepository;
@@ -18,20 +22,9 @@ export class AuthService {
     return user !== null;
   }
 
-  generateOtpToken(email: string) {
-    const otp = Math.floor(100000 + Math.random() * 900000);
-
-    const payload = {
-      email,
-      otp,
-      timestamp: Date.now(),
-    };
-
-    const token = jwt.sign(payload, config.JWT_SECRET_KEY, {
-      expiresIn: "3m",
-    });
-
-    return { otp, token };
+  generateOtp() {
+    const otp = totp.generate(config.OTP_SECRET_KEY);
+    return otp;
   }
 
   async sendVerificationCodeEmail(name: string, email: string, otp: string) {
@@ -49,7 +42,31 @@ export class AuthService {
     );
   }
 
-  async createAccount() {}
+  verifyOtp(otp: string) {
+    try {
+      const isValid = totp.check(otp, config.OTP_SECRET_KEY);
+      return isValid;
+    } catch (error) {
+      console.error("Error verifying OTP: ", error);
+      return false;
+    }
+  }
 
-  async verifyOtp() {}
+  generateJwtToken(user: TUserBasicData) {
+    const token = jwt.sign(user, config.JWT_SECRET_KEY, {
+      expiresIn: "7d",
+    });
+    return token;
+  }
+
+  async createAccount(name: string, email: string) {
+    const randomPassword = Math.random().toString(36).slice(-11);
+    const user = await this.authRepository.createUser(
+      name,
+      email,
+      randomPassword
+    );
+
+    return user;
+  }
 }

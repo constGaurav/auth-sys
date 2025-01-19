@@ -11,6 +11,8 @@ export const UserBasicData = z.object({
   email: z.string().email(),
 });
 
+export type TUserBasicData = z.infer<typeof UserBasicData>;
+
 export const UserWithPassword = z.object({
   id: z.string(),
   name: z.string(),
@@ -21,3 +23,9 @@ export const UserWithPassword = z.object({
 });
 
 export type TUserWithPassword = z.infer<typeof UserWithPassword>;
+
+export const VerifyOtpRequestSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  otp: z.string(),
+});
